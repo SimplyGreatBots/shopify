@@ -7,7 +7,7 @@ import { states } from './src/definitions/states'
 
 export default new IntegrationDefinition({
   name: INTEGRATION_NAME,
-  version: '1.0.0',
+  version: '1.1.0',
   readme: 'hub.md',
   icon: 'icon.svg',
   configuration,

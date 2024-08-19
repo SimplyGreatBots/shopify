@@ -92,4 +92,21 @@ const getCustomerOrders = {
   },
 } satisfies ActionDefinition
 
-export const actions = { getProducts, getProductVariants, getCustomers, getCustomerOrders }
+const makeApiRequest = {
+  title: 'Make API Request',
+  description: 'Makes a request to Shopify API',
+  input: {
+    schema: z.object({
+      method: z.string(),
+      path: z.string(),
+      headers: z.string().optional(),
+      params: z.string().optional(),
+      requestBody: z.string().optional(),
+    }),
+    },
+    output: {
+      schema: z.object({}).passthrough(),
+    },
+  } satisfies ActionDefinition
+
+export const actions = { getProducts, getProductVariants, getCustomers, getCustomerOrders, makeApiRequest }
