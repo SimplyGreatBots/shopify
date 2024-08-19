@@ -1,9 +1,17 @@
 import { IntegrationDefinition } from '@botpress/sdk'
-import { integrationName } from './package.json'
+import { INTEGRATION_NAME } from './src/const'
+import { actions } from './src/definitions/actions'
+import { configuration } from './src/definitions/configuration'
+import { events } from './src/definitions/events'
+import { states } from './src/definitions/states'
 
 export default new IntegrationDefinition({
-  name: integrationName,
-  version: '0.0.1',
+  name: INTEGRATION_NAME,
+  version: '1.0.0',
   readme: 'hub.md',
   icon: 'icon.svg',
+  configuration,
+  actions,
+  states,
+  events,
 })
