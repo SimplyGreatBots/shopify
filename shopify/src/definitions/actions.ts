@@ -1,4 +1,5 @@
 import { IntegrationDefinitionProps, z} from '@botpress/sdk'
+import { describe } from 'node:test'
 
 type ActionDefinition = NonNullable<IntegrationDefinitionProps['actions']>[string]
 
@@ -97,15 +98,18 @@ const makeApiRequest = {
   description: 'Makes a request to Shopify API',
   input: {
     schema: z.object({
-      method: z.string(),
-      path: z.string(),
-      headers: z.string().optional(),
-      params: z.string().optional(),
-      requestBody: z.string().optional(),
+      method: z.string().describe('The HTTP method to use for the request. Options: GET, POST, PUT, DEL'),
+      path: z.string().describe('The endpoint of the request. Only paths after "/api/2024-07" is needed. Example: products.json'),
+      headers: z.string().optional().describe('The headers to include in the request (JSON Stringified). Example: { "Content-Type": "application/json" }'),
+      params: z.string().optional().describe('The query parameters to include in the request (JSON Stringified). Example: { "limit": 10 }'),
+      requestBody: z.string().optional().describe('The body of the request (JSON Stringified). Example: Example: { "product": { "title": "Simply Great Product", "variants": [{ "price": "199.99" }] } }'),
     }),
     },
     output: {
-      schema: z.object({}).passthrough(),
+      schema: z.object({
+        success: z.boolean(),
+        body: z.object({}).passthrough(),
+      }).passthrough(),
     },
   } satisfies ActionDefinition
 

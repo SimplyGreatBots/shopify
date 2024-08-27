@@ -1,49 +1,34 @@
-import axios, { AxiosResponse } from "axios";
+import axios from "axios";
 import * as botpress from '.botpress'
+import { SHOPIFY_API_VERSION } from '../const'
 
 type MakeApiRequest = botpress.IntegrationProps['actions']['makeApiRequest']
-type MakeApiRequestInput = botpress.actions.makeApiRequest.input.Input
 type MakeApiRequestOuput = botpress.actions.makeApiRequest.output.Output
-type IntegrationLogger = botpress.Client['client']['logger']
-
-export const makeRequest = async (url: string, input: MakeApiRequestInput, accessToken: string): Promise<AxiosResponse> => {
-    return await axios({
-        method: input.method,
-        url: url,
-        data: input.requestBody ? JSON.parse(input.requestBody) : {},
-        params: input.params ? JSON.parse(input.params) : {},
-        headers: {
-            'X-Shopify-Access-Token': accessToken,
-            ...(input.headers ? JSON.parse(input.headers) : {}),
-        },
-    });
-  };
-
-const handleError = (errorMsg: string, error: any, logger: IntegrationLogger) => {
-    const fullErrorMsg = `${errorMsg} ${
-        error?.response?.status || error?.message || "Unknown Error"
-      }`;
-      logger.forBot().error(fullErrorMsg);
-
-    return {
-        success: false,
-        error: fullErrorMsg,
-    } as const;
-};
 
 export const makeApiRequest: MakeApiRequest = async ({input, ctx, logger}): Promise<MakeApiRequestOuput> => {
+    try {
+      let config = {
+        method: input.method,
+        maxBodyLength: Infinity,
+        url: `https://d4a820-b2.myshopify.com/admin/api/${SHOPIFY_API_VERSION}/${input.path}`,
+        params: input.params ? JSON.parse(input.params) : {},
+        headers: {
+            'X-Shopify-Access-Token': ctx.configuration.access_token,
+            ...(input.headers ? JSON.parse(input.headers) : {}),
+        }
+      };
+      
+      const response = await axios.request(config);
+      logger.forBot().info('Successfully API Request made to Shopify:');
+      return { success: true, body: response.data };
+    } catch (error: any) {
 
-const url = `https://${ctx.configuration.shopName}.myshopify.com/admin/api/${input.path}`;
+      const fullErrorMsg = `${error} ${
+        error?.response?.status || error?.message || "Unknown Error"
+      }`;
 
-  try {
-    logger.forBot().info(`Making API request to ${url} with method ${input.method}, headers ${input.headers}, params ${input.params}, and body ${input.requestBody}`);
-    const res = await makeRequest(url, input, ctx.configuration.access_token);
+      logger.forBot().error('API Request Failed with response:', error);
 
-    return { success: true, body: res.data, };
-
-  } catch (e) {
-    const errorMsg = `'Make API request' error:`;
-    return handleError(errorMsg, e, logger);
-  }
-
-};
+      return { success: false, body: { fullErrorMsg } };
+    }
+}
